@@ -1,0 +1,144 @@
+{
+  "solicitudes": [
+    {
+      "id": "4c22eac8-aa44-4cff-9c71-862175c25f3c",
+      "nombre_chofer": "chicho serna",
+      "fecha_solicitud": "2026-05-24",
+      "fecha_descanso": "2026-05-31",
+      "motivo": "",
+      "registrado_por": "Christian",
+      "creado_en": "2026-05-24T02:10:51.868Z",
+      "cumplida": false
+    },
+    {
+      "id": "faba27bc-aa52-4b32-82a3-49d5d0e185e1",
+      "nombre_chofer": "Lito Nebia",
+      "fecha_solicitud": "2026-05-24",
+      "fecha_descanso": "2026-05-21",
+      "motivo": "cumlpe la tia",
+      "registrado_por": "Christian",
+      "creado_en": "2026-05-24T02:08:14.766Z",
+      "cumplida": false
+    },
+    {
+      "id": "accb4864-4ebc-4ba4-8c06-00ad2f42f65e",
+      "nombre_chofer": "lucho mendez",
+      "fecha_solicitud": "2026-05-23",
+      "fecha_descanso": "2026-05-24",
+      "motivo": "asado",
+      "registrado_por": "Christian",
+      "creado_en": "2026-05-23T23:26:43.112Z",
+      "cumplida": true
+    },
+    {
+      "id": "a1f6274c-6d3d-4a32-96ae-b63c83ef2902",
+      "nombre_chofer": "titi teran",
+      "fecha_solicitud": "2026-05-23",
+      "fecha_descanso": "2026-05-24",
+      "motivo": "tomar te",
+      "registrado_por": "Christian",
+      "creado_en": "2026-05-23T19:07:13.607Z"
+    },
+    {
+      "id": "fc51f12a-29bd-4d94-a8e4-fe5b98fd1d66",
+      "nombre_chofer": "cacho castaña",
+      "fecha_solicitud": "2026-05-23",
+      "fecha_descanso": "2026-05-24",
+      "motivo": "recital",
+      "registrado_por": "Christian",
+      "creado_en": "2026-05-23T19:04:47.548Z",
+      "cumplida": true
+    },
+    {
+      "id": "6cd4fdfe-2ae3-4dd9-b9cf-c6d782c3f485",
+      "nombre_chofer": "gallo carlos",
+      "fecha_solicitud": "2026-05-23",
+      "fecha_descanso": "2026-05-26",
+      "motivo": "cansado",
+      "registrado_por": "Ariel",
+      "creado_en": "2026-05-23T18:50:20.268Z"
+    },
+    {
+      "id": "dd8e223b-4188-45e5-bb57-1626a6a45143",
+      "nombre_chofer": "enzo fernandez",
+      "fecha_solicitud": "2026-05-23",
+      "fecha_descanso": "2026-05-25",
+      "motivo": "mundial",
+      "registrado_por": "Christian",
+      "creado_en": "2026-05-23T18:46:31.616Z",
+      "cumplida": false
+    },
+    {
+      "id": "5bb2c0b4-82e3-4aeb-a345-c5f01bf14401",
+      "nombre_chofer": "Lilisuyo",
+      "fecha_solicitud": "2026-05-23",
+      "fecha_descanso": "2026-05-25",
+      "motivo": "turno pedicuro",
+      "registrado_por": "Christian",
+      "creado_en": "2026-05-23T18:29:37.372Z"
+    },
+    {
+      "id": "b58fc90b-03dc-4f28-830f-0afa7b9af0d5",
+      "nombre_chofer": "Caro Ocuore",
+      "fecha_solicitud": "2026-05-23",
+      "fecha_descanso": "2026-05-29",
+      "motivo": "manicura",
+      "registrado_por": "Ariel",
+      "creado_en": "2026-05-23T18:28:59.118Z"
+    },
+    {
+      "id": "910fb5aa-c809-4a63-aaae-a94e63a49c3b",
+      "nombre_chofer": "Esteban kito",
+      "fecha_solicitud": "2026-05-23",
+      "fecha_descanso": "2026-05-27",
+      "motivo": "turno con el ornitorrinco",
+      "registrado_por": "Yamil",
+      "creado_en": "2026-05-23T18:27:28.697Z"
+    },
+    {
+      "id": "f10e41a1-7cd7-4820-9a84-da70c1bcf420",
+      "nombre_chofer": "Coco Chanel",
+      "fecha_solicitud": "2026-05-23",
+      "fecha_descanso": "2026-05-25",
+      "motivo": "cumpleaños el perrito",
+      "registrado_por": "Christian",
+      "creado_en": "2026-05-23T18:26:21.803Z"
+    },
+    {
+      "id": "ad59151f-a88b-46e2-b3f4-0b2f1411799a",
+      "nombre_chofer": "Juan Perez",
+      "fecha_solicitud": "2026-05-23",
+      "fecha_descanso": "2026-05-31",
+      "motivo": "comunion de la vecina",
+      "registrado_por": "Christian",
+      "creado_en": "2026-05-23T18:25:57.732Z"
+    }
+  ],
+  "notificacionesDiarias": [
+    {
+      "email_destino": "urko5673@gmail.com",
+      "fecha_envio": "2026-05-23",
+      "enviado_en": "2026-05-23T23:38:55.351Z"
+    },
+    {
+      "email_destino": "urko5673@gmail.com",
+      "fecha_envio": "2026-05-24",
+      "enviado_en": "2026-05-25T02:38:01.193Z"
+    },
+    {
+      "email_destino": "chayward@friosdelnorte.com.ar",
+      "fecha_envio": "2026-05-24",
+      "enviado_en": "2026-05-25T02:47:59.358Z"
+    },
+    {
+      "email_destino": "chayward@friosdelnorte.com.ar",
+      "fecha_envio": "2026-05-25",
+      "enviado_en": "2026-05-25T04:33:29.043Z"
+    },
+    {
+      "email_destino": "urko5673@gmail.com",
+      "fecha_envio": "2026-05-25",
+      "enviado_en": "2026-05-25T04:33:33.407Z"
+    }
+  ]
+}

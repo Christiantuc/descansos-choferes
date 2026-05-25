@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Descansos de Choferes</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+  <div id="login-screen" class="login-screen">
+    <div class="login-card card">
+      <h1>Descansos de Choferes</h1>
+      <p class="subtitle">Ingrese su nombre para acceder</p>
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="nombre-usuario">Nombre</label>
+          <input
+            type="text"
+            id="nombre-usuario"
+            name="nombreUsuario"
+            required
+            autocomplete="username"
+            list="usuarios-habilitados"
+            placeholder="Ej. Christian"
+          />
+          <datalist id="usuarios-habilitados">
+            <option value="Christian"></option>
+            <option value="Ariel"></option>
+            <option value="Yamil"></option>
+            <option value="Jorge"></option>
+            <option value="Sebastian"></option>
+            <option value="Dario"></option>
+            <option value="Invitado"></option>
+          </datalist>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+        </div>
+      </form>
+      <p id="login-message" class="form-message login-message" role="alert" aria-live="assertive"></p>
+    </div>
+  </div>
+
+  <div id="app-screen" class="app is-hidden">
+    <header class="header">
+      <div class="header-top">
+        <p class="user-greeting">Sesión: <strong id="usuario-activo"></strong></p>
+        <button type="button" id="btn-cerrar-sesion" class="btn btn-secondary btn-sm">Cerrar sesión</button>
+      </div>
+      <h1>Descansos de Choferes</h1>
+      <p class="subtitle">Registro y consulta de solicitudes de descanso</p>
+    </header>
+
+    <main class="main">
+      <section id="alertas-section" class="card alertas-card is-hidden" aria-labelledby="alertas-title">
+        <h2 id="alertas-title">Avisos de descansos próximos</h2>
+        <p class="alertas-intro">Descansos programados dentro de los próximos 5 días:</p>
+        <ul id="alertas-lista" class="alertas-lista"></ul>
+      </section>
+
+      <section class="card" aria-labelledby="form-title">
+        <h2 id="form-title">Nueva solicitud de descanso</h2>
+        <form id="solicitud-form" novalidate>
+          <div class="field">
+            <label for="nombre-chofer">Nombre del chofer</label>
+            <input
+              type="text"
+              id="nombre-chofer"
+              name="nombreChofer"
+              required
+              autocomplete="name"
+              placeholder="Ej. Juan Pérez"
+            />
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="fecha-solicitud">Fecha de la solicitud</label>
+              <input
+                type="date"
+                id="fecha-solicitud"
+                name="fechaSolicitud"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="fecha-descanso">Fecha del descanso solicitado</label>
+              <input
+                type="date"
+                id="fecha-descanso"
+                name="fechaDescanso"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="motivo">Motivo del descanso (opcional)</label>
+            <textarea
+              id="motivo"
+              name="motivo"
+              rows="3"
+              placeholder="Describa el motivo de la solicitud"
+            ></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Registrar solicitud</button>
+            <button type="reset" class="btn btn-secondary">Limpiar</button>
+          </div>
+        </form>
+        <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="card" aria-labelledby="list-title">
+        <div class="list-header">
+          <h2 id="list-title">Solicitudes registradas</h2>
+          <span id="total-count" class="badge">0</span>
+        </div>
+        <div class="export-buttons">
+          <button type="button" id="btn-exportar-excel" class="btn btn-secondary btn-sm">Exportar Excel</button>
+          <button type="button" id="btn-exportar-pdf" class="btn btn-secondary btn-sm">Exportar PDF</button>
+        </div>
+
+        <div id="empty-state" class="empty-state">
+          <p>No hay solicitudes registradas.</p>
+          <p class="empty-hint">Complete el formulario para agregar la primera solicitud.</p>
+        </div>
+
+        <div class="table-wrapper is-hidden" id="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Chofer</th>
+                <th>Fecha solicitud</th>
+                <th>Fecha descanso</th>
+                <th>Motivo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="solicitudes-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Datos compartidos en el servidor. Los usuarios habilitados reciben un aviso diario por correo cuando hay descansos en los próximos 5 días.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

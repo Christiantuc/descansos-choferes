@@ -1,0 +1,26 @@
+{
+  "name": "descansos-choferes",
+  "version": "1.0.0",
+  "description": "Gestión de descansos de choferes con avisos diarios por correo",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "verificar-correo": "node server/verify-smtp.js",
+    "notificar": "node server/run-notifications.js",
+    "notificar-forzar": "node server/run-notifications.js --force"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.10.1",
+    "xlsx": "^0.18.5",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2"
+  }
+}

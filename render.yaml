@@ -1,0 +1,32 @@
+# Blueprint opcional para Render.com
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: descansos-choferes
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: TZ
+        value: America/Argentina/Buenos_Aires
+      - key: CRON_AVISOS
+        value: "0 8 * * *"
+      - key: DIAS_ALERTA
+        value: "5"
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: ADMIN_KEY
+        generateValue: true
