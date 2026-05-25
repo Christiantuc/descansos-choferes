@@ -1,0 +1,20 @@
+Copie cada linea en Render como "Environment Variable".
+Key = texto antes del =
+Value = texto despues del = (sin comillas en MAIL_FROM)
+
+NODE_VERSION=20
+
+(Todo lo demas: abra su archivo .env en la PC y copie cada valor)
+
+TZ=
+DIAS_ALERTA=
+CRON_AVISOS=
+SMTP_HOST=
+SMTP_PORT=
+SMTP_SECURE=
+SMTP_USER=
+SMTP_PASS=
+MAIL_FROM=
+ADMIN_KEY=
+
+NO agregue PORT.

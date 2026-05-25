@@ -2,6 +2,8 @@
 
 Aplicación para registrar solicitudes de descanso y enviar **un aviso diario por correo** a todos los usuarios habilitados cuando hay descansos dentro de los próximos 5 días.
 
+> **¿Querés publicarla en internet?** Abrí primero **[EMPEZAR-AQUI.md](./EMPEZAR-AQUI.md)** (guía simple paso a paso).
+
 ## Requisitos
 
 - [Node.js](https://nodejs.org/) 18 o superior

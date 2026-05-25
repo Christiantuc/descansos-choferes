@@ -46,11 +46,11 @@ git init
 git add .
 git commit -m "App descansos lista para deploy"
 git branch -M main
-git remote add origin https://github.com/TU_USUARIO/descansos-choferes.git
+git remote add origin https://github.com/Christiantuc/descansos-choferes.git
 git push -u origin main
 ```
 
-Reemplazá `TU_USUARIO` y el nombre del repo por los tuyos.
+Tu usuario es **Christiantuc** y el repo será **descansos-choferes**. Si aún no subiste el código, seguí primero **[SUBIR-GITHUB.md](./SUBIR-GITHUB.md)**.
 
 > **Importante:** El archivo `.env` **no** se sube a GitHub (está en `.gitignore`). Las claves se cargan después en Render.
 
