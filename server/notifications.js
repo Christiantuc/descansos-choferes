@@ -41,8 +41,9 @@ async function verifySmtpConnection() {
   }
 }
 
-function getSolicitudesProximas(solicitudes = db.getAllSolicitudes()) {
-  return solicitudes
+async function getSolicitudesProximas(solicitudes = null) {
+  const lista = solicitudes || (await db.getAllSolicitudes());
+  return lista
     .map((s) => ({
       ...s,
       diasRestantes: diasHasta(s.fechaDescanso),
@@ -136,7 +137,7 @@ function escapeHtml(text) {
 async function sendDailyNotifications(options = {}) {
   const { force = false } = options;
   const fechaHoy = fechaHoyISO();
-  const proximas = getSolicitudesProximas();
+  const proximas = await getSolicitudesProximas();
 
   const resultado = {
     fecha: fechaHoy,
@@ -185,7 +186,7 @@ async function sendDailyNotifications(options = {}) {
   const text = buildEmailText(proximas);
 
   for (const destinatario of destinatarios) {
-    if (!force && db.wasDailyNotificationSent(destinatario.email, fechaHoy)) {
+    if (!force && (await db.wasDailyNotificationSent(destinatario.email, fechaHoy))) {
       resultado.omitidos += 1;
       console.log(
         `[avisos] Ya enviado hoy a ${destinatario.email}, se omite.`
@@ -202,7 +203,7 @@ async function sendDailyNotifications(options = {}) {
         html,
       });
 
-      db.markDailyNotificationSent(destinatario.email, fechaHoy);
+      await db.markDailyNotificationSent(destinatario.email, fechaHoy);
       resultado.enviados += 1;
       console.log(`[avisos] Correo enviado a ${destinatario.email}`);
     } catch (error) {

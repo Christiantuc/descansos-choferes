@@ -1,9 +1,11 @@
 require("dotenv").config({ path: require("path").join(__dirname, "..", ".env") });
 
 const config = require("./config");
+const storage = require("./storage");
 const { getSolicitudesProximas, sendDailyNotifications, verifySmtpConnection } = require("./notifications");
 
 async function main() {
+  await storage.initStorage();
   console.log("--- Verificación de correo (Gmail) ---\n");
 
   const smtpStatus = config.getSmtpStatus();
@@ -26,7 +28,7 @@ async function main() {
 
   console.log("Conexión SMTP: OK\n");
 
-  const proximas = getSolicitudesProximas();
+  const proximas = await getSolicitudesProximas();
   console.log(`Descansos próximos (≤ ${config.DIAS_ALERTA} días): ${proximas.length}`);
 
   if (proximas.length === 0) {

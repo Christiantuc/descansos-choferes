@@ -17,4 +17,9 @@ SMTP_PASS=
 MAIL_FROM=
 ADMIN_KEY=
 
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+
+(Obligatorio en Render para que los datos no se pierdan. Crear base gratis en https://upstash.com)
+
 NO agregue PORT.

@@ -174,15 +174,62 @@ No es obligatorio si ya tenés el cron de las 08:00 con `POST /api/notificacione
 
 ---
 
-## Parte 5 — Migrar datos desde tu PC
+## Parte 5 — Almacenamiento persistente (obligatorio en Render)
 
-Si ya tenés solicitudes en `data/descansos.json` en tu computadora:
+En el plan **gratuito** de Render, el disco del servidor es **efímero**: todo lo que se guarda en `data/descansos.json` **se pierde** al reiniciar, dormir o redesplegar. Por eso los datos del día de hoy pueden desaparecer.
 
-1. Después del primer deploy, entrá a la app en Render y cargá de nuevo las solicitudes, **o**
-2. En Render Dashboard → tu servicio → **Shell** (si está disponible en tu plan) y copiá el archivo, **o**
-3. Hacé un deploy subiendo `data/descansos.json` en el repo (solo si el repo es **privado**).
+La app usa **Upstash Redis** (gratis) para guardar las solicitudes de forma permanente.
 
-> Cada **nuevo deploy** desde GitHub puede resetear archivos que no estén en el repo. Para producción seria conviene un disco persistente (Render pago) o base de datos; para empezar, dejar el JSON en el repo privado es aceptable.
+### 5.1 Crear base en Upstash (5 minutos)
+
+1. Entrá a **https://upstash.com** y creá cuenta (gratis).
+2. **Create Database** → región cercana (ej. `us-east-1`) → **Create**.
+3. En la base, pestaña **REST API** → copiá:
+   - `UPSTASH_REDIS_REST_URL`
+   - `UPSTASH_REDIS_REST_TOKEN`
+
+### 5.2 Agregar variables en Render
+
+En tu servicio → **Environment** → agregá:
+
+| Key | Value |
+|-----|--------|
+| `UPSTASH_REDIS_REST_URL` | la URL de Upstash |
+| `UPSTASH_REDIS_REST_TOKEN` | el token de Upstash |
+
+Guardá y esperá el **redeploy** automático.
+
+### 5.3 Verificar
+
+Abrí `https://TU-APP.onrender.com/api/health` y buscá:
+
+```json
+"storage": { "backend": "upstash", "persistent": true, ... }
+```
+
+Si dice `"backend": "file"` y hay `"warning"`, faltan las variables de Upstash.
+
+### 5.4 Migrar datos desde tu PC
+
+Si tenés solicitudes en `data/descansos.json` en tu computadora:
+
+1. En tu PC, agregá las mismas variables `UPSTASH_*` en el archivo `.env`.
+2. Ejecutá:
+
+```bash
+npm run importar-datos
+```
+
+Eso sube el JSON local a Upstash. Todos los usuarios verán los mismos datos en la URL de Render.
+
+**Alternativa (sin Upstash en la PC):** después del deploy, llamá al endpoint de importación con tu `ADMIN_KEY`:
+
+```bash
+curl -X POST "https://TU-APP.onrender.com/api/admin/importar-datos" \
+  -H "Content-Type: application/json" \
+  -H "x-admin-key: TU_ADMIN_KEY" \
+  -d @data/descansos.json
+```
 
 ---
 
@@ -213,9 +260,9 @@ Normal en Render free: el servidor estaba dormido. La primera visita lo despiert
 - Revisá **Logs** en Render a esa hora.
 - Revisá spam en Gmail.
 
-### Perdí las solicitudes después de un deploy
+### Perdí las solicitudes después de un deploy o no se guardan los datos de hoy
 
-El plan free no guarda archivos entre deploys de forma garantizada. Subí `data/descansos.json` al repo (privado) o usá disco persistente en Render.
+Render free **no persiste** archivos en disco. Configurá **Upstash** (Parte 5) y ejecutá `npm run importar-datos` para recuperar lo que tengas en tu PC.
 
 ---
 

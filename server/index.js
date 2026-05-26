@@ -5,6 +5,7 @@ const { randomUUID } = require("crypto");
 
 const config = require("./config");
 const db = require("./db");
+const storage = require("./storage");
 const { iniciarCron } = require("./cron");
 const {
   getSolicitudesProximas,
@@ -16,6 +17,11 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+app.use("/api", (_req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
 
 function requireUsuario(req, res, next) {
   const nombre = req.headers["x-usuario"];
@@ -40,7 +46,8 @@ app.get("/api/health", async (_req, res) => {
     smtpError = verificacion.error || null;
   }
 
-  const proximas = getSolicitudesProximas();
+  const proximas = await getSolicitudesProximas();
+  const storageInfo = storage.getStorageInfo();
 
   res.json({
     ok: true,
@@ -50,6 +57,7 @@ app.get("/api/health", async (_req, res) => {
     smtpError,
     usuariosConEmail: config.loadUsuariosConEmail().length,
     descansosProximos: proximas.length,
+    storage: storageInfo,
   });
 });
 
@@ -64,18 +72,18 @@ app.post("/api/auth/validar", (req, res) => {
   res.json({ usuario });
 });
 
-app.get("/api/solicitudes", requireUsuario, (_req, res) => {
-  res.json(db.getAllSolicitudes());
+app.get("/api/solicitudes", requireUsuario, async (_req, res) => {
+  res.json(await db.getAllSolicitudes());
 });
 
-app.post("/api/solicitudes", requireUsuario, (req, res) => {
+app.post("/api/solicitudes", requireUsuario, async (req, res) => {
   const { nombreChofer, fechaSolicitud, fechaDescanso, motivo } = req.body || {};
 
   if (!nombreChofer?.trim() || !fechaSolicitud || !fechaDescanso) {
     return res.status(400).json({ error: "Complete todos los campos obligatorios." });
   }
 
-  const solicitud = db.insertSolicitud({
+  const solicitud = await db.insertSolicitud({
     id: randomUUID(),
     nombreChofer: nombreChofer.trim(),
     fechaSolicitud,
@@ -88,7 +96,7 @@ app.post("/api/solicitudes", requireUsuario, (req, res) => {
   res.status(201).json(solicitud);
 
   setImmediate(async () => {
-    const proximas = getSolicitudesProximas();
+    const proximas = await getSolicitudesProximas();
     if (proximas.some((p) => p.id === solicitud.id)) {
       const resultado = await sendDailyNotifications();
       if (resultado.enviados > 0) {
@@ -98,8 +106,8 @@ app.post("/api/solicitudes", requireUsuario, (req, res) => {
   });
 });
 
-app.delete("/api/solicitudes/:id", requireUsuario, (req, res) => {
-  const eliminado = db.deleteSolicitud(req.params.id);
+app.delete("/api/solicitudes/:id", requireUsuario, async (req, res) => {
+  const eliminado = await db.deleteSolicitud(req.params.id);
 
   if (!eliminado) {
     return res.status(404).json({ error: "Solicitud no encontrada." });
@@ -108,9 +116,9 @@ app.delete("/api/solicitudes/:id", requireUsuario, (req, res) => {
   res.status(204).send();
 });
 
-app.patch("/api/solicitudes/:id/cumplida", requireUsuario, (req, res) => {
+app.patch("/api/solicitudes/:id/cumplida", requireUsuario, async (req, res) => {
   const { cumplida } = req.body || {};
-  const solicitud = db.markSolicitudAsCumplida(req.params.id, cumplida);
+  const solicitud = await db.markSolicitudAsCumplida(req.params.id, cumplida);
 
   if (!solicitud) {
     return res.status(404).json({ error: "Solicitud no encontrada." });
@@ -119,12 +127,32 @@ app.patch("/api/solicitudes/:id/cumplida", requireUsuario, (req, res) => {
   res.json(solicitud);
 });
 
-app.get("/api/alertas/proximas", requireUsuario, (_req, res) => {
-  const proximas = getSolicitudesProximas();
+app.get("/api/alertas/proximas", requireUsuario, async (_req, res) => {
+  const proximas = await getSolicitudesProximas();
   res.json({
     diasAlerta: config.DIAS_ALERTA,
     total: proximas.length,
     solicitudes: proximas,
+  });
+});
+
+app.post("/api/admin/importar-datos", async (req, res) => {
+  const adminKey = req.headers["x-admin-key"] || req.body?.adminKey;
+
+  if (!config.ADMIN_KEY || adminKey !== config.ADMIN_KEY) {
+    return res.status(403).json({ error: "No autorizado." });
+  }
+
+  const { solicitudes, notificacionesDiarias } = req.body || {};
+  if (!Array.isArray(solicitudes)) {
+    return res.status(400).json({ error: "Se requiere un arreglo solicitudes." });
+  }
+
+  const datos = await db.importarDatos({ solicitudes, notificacionesDiarias });
+  res.json({
+    ok: true,
+    solicitudes: datos.solicitudes.length,
+    notificacionesDiarias: datos.notificacionesDiarias.length,
   });
 });
 
@@ -149,38 +177,47 @@ app.get("*", (_req, res) => {
 
 const host = process.env.HOST || "0.0.0.0";
 
-app.listen(config.PORT, host, async () => {
-  console.log(`Servidor en http://${host}:${config.PORT}`);
+async function iniciarServidor() {
+  await storage.initStorage();
 
-  const smtpStatus = config.getSmtpStatus();
-  if (!smtpStatus.ok) {
-    console.warn("[correo]", smtpStatus.motivo);
-    console.warn("  Guía: GMAIL-CONFIG.md | Prueba: npm run verificar-correo");
-  } else {
-    const verificacion = await verifySmtpConnection();
-    if (verificacion.ok) {
-      console.log("[correo] Gmail conectado correctamente.");
+  app.listen(config.PORT, host, async () => {
+    console.log(`Servidor en http://${host}:${config.PORT}`);
+
+    const smtpStatus = config.getSmtpStatus();
+    if (!smtpStatus.ok) {
+      console.warn("[correo]", smtpStatus.motivo);
+      console.warn("  Guía: GMAIL-CONFIG.md | Prueba: npm run verificar-correo");
     } else {
-      console.error("[correo] Error al conectar Gmail:", verificacion.error);
+      const verificacion = await verifySmtpConnection();
+      if (verificacion.ok) {
+        console.log("[correo] Gmail conectado correctamente.");
+      } else {
+        console.error("[correo] Error al conectar Gmail:", verificacion.error);
+      }
     }
-  }
 
-  const usuariosEmail = config.loadUsuariosConEmail();
-  if (usuariosEmail.length === 0) {
-    console.warn(
-      "Agregue correos en config/usuarios.json para enviar avisos diarios."
-    );
-  } else {
-    console.log(
-      `Usuarios con correo configurado: ${usuariosEmail.map((u) => u.nombre).join(", ")}`
-    );
-  }
+    const usuariosEmail = config.loadUsuariosConEmail();
+    if (usuariosEmail.length === 0) {
+      console.warn(
+        "Agregue correos en config/usuarios.json para enviar avisos diarios."
+      );
+    } else {
+      console.log(
+        `Usuarios con correo configurado: ${usuariosEmail.map((u) => u.nombre).join(", ")}`
+      );
+    }
 
-  iniciarCron();
+    iniciarCron();
 
-  setTimeout(async () => {
-    console.log("[inicio] Verificando avisos pendientes del día...");
-    const resultado = await sendDailyNotifications();
-    console.log("[inicio] Resultado avisos:", resultado);
-  }, 3000);
+    setTimeout(async () => {
+      console.log("[inicio] Verificando avisos pendientes del día...");
+      const resultado = await sendDailyNotifications();
+      console.log("[inicio] Resultado avisos:", resultado);
+    }, 3000);
+  });
+}
+
+iniciarServidor().catch((error) => {
+  console.error("[inicio] No se pudo iniciar el servidor:", error.message);
+  process.exit(1);
 });

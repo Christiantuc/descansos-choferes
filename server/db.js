@@ -1,132 +1,4 @@
-const fs = require("fs");
-const path = require("path");
-
-const dataDir = process.env.DATA_DIR
-  ? path.resolve(process.env.DATA_DIR)
-  : path.join(__dirname, "..", "data");
-const dbPath = path.join(dataDir, "descansos.json");
-
-const DEFAULT_DATA = {
-  solicitudes: [],
-  notificacionesDiarias: [],
-};
-
-function ensureDataFile() {
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-
-  if (!fs.existsSync(dbPath)) {
-    fs.writeFileSync(dbPath, JSON.stringify(DEFAULT_DATA, null, 2), "utf8");
-  }
-}
-
-function readData() {
-  ensureDataFile();
-  try {
-    const raw = fs.readFileSync(dbPath, "utf8");
-    const data = JSON.parse(raw);
-    return {
-      solicitudes: Array.isArray(data.solicitudes) ? data.solicitudes : [],
-      notificacionesDiarias: Array.isArray(data.notificacionesDiarias)
-        ? data.notificacionesDiarias
-        : [],
-    };
-  } catch {
-    return { ...DEFAULT_DATA };
-  }
-}
-
-function writeData(data) {
-  ensureDataFile();
-  fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), "utf8");
-}
-
-function getAllSolicitudes() {
-  const data = readData();
-  return data.solicitudes
-    .map(mapSolicitudFromStore)
-    .sort((a, b) => {
-      if (a.fechaDescanso !== b.fechaDescanso) {
-        return a.fechaDescanso.localeCompare(b.fechaDescanso);
-      }
-      return (b.creadoEn || "").localeCompare(a.creadoEn || "");
-    });
-}
-
-function getSolicitudById(id) {
-  const data = readData();
-  const row = data.solicitudes.find((s) => s.id === id);
-  return row ? mapSolicitudFromStore(row) : null;
-}
-
-function insertSolicitud(solicitud) {
-  const data = readData();
-  const row = {
-    id: solicitud.id,
-    nombre_chofer: solicitud.nombreChofer,
-    fecha_solicitud: solicitud.fechaSolicitud,
-    fecha_descanso: solicitud.fechaDescanso,
-    motivo: solicitud.motivo,
-    registrado_por: solicitud.registradoPor || null,
-    creado_en: solicitud.creadoEn,
-    cumplida: false,
-  };
-
-  data.solicitudes.unshift(row);
-  writeData(data);
-  return mapSolicitudFromStore(row);
-}
-
-function deleteSolicitud(id) {
-  const data = readData();
-  const antes = data.solicitudes.length;
-  data.solicitudes = data.solicitudes.filter((s) => s.id !== id);
-
-  if (data.solicitudes.length === antes) {
-    return false;
-  }
-
-  writeData(data);
-  return true;
-}
-
-function markSolicitudAsCumplida(id, cumplida = true) {
-  const data = readData();
-  const solicitud = data.solicitudes.find((s) => s.id === id);
-
-  if (!solicitud) {
-    return null;
-  }
-
-  solicitud.cumplida = cumplida;
-  writeData(data);
-  return mapSolicitudFromStore(solicitud);
-}
-
-function wasDailyNotificationSent(email, fechaEnvio) {
-  const data = readData();
-  return data.notificacionesDiarias.some(
-    (n) => n.email_destino === email && n.fecha_envio === fechaEnvio
-  );
-}
-
-function markDailyNotificationSent(email, fechaEnvio) {
-  const data = readData();
-
-  const existe = data.notificacionesDiarias.some(
-    (n) => n.email_destino === email && n.fecha_envio === fechaEnvio
-  );
-
-  if (!existe) {
-    data.notificacionesDiarias.push({
-      email_destino: email,
-      fecha_envio: fechaEnvio,
-      enviado_en: new Date().toISOString(),
-    });
-    writeData(data);
-  }
-}
+const storage = require("./storage");
 
 function mapSolicitudFromStore(row) {
   return {
@@ -141,6 +13,105 @@ function mapSolicitudFromStore(row) {
   };
 }
 
+async function getAllSolicitudes() {
+  const data = await storage.readData();
+  return data.solicitudes
+    .map(mapSolicitudFromStore)
+    .sort((a, b) => {
+      if (a.fechaDescanso !== b.fechaDescanso) {
+        return a.fechaDescanso.localeCompare(b.fechaDescanso);
+      }
+      return (b.creadoEn || "").localeCompare(a.creadoEn || "");
+    });
+}
+
+async function getSolicitudById(id) {
+  const data = await storage.readData();
+  const row = data.solicitudes.find((s) => s.id === id);
+  return row ? mapSolicitudFromStore(row) : null;
+}
+
+async function insertSolicitud(solicitud) {
+  const data = await storage.readData();
+  const row = {
+    id: solicitud.id,
+    nombre_chofer: solicitud.nombreChofer,
+    fecha_solicitud: solicitud.fechaSolicitud,
+    fecha_descanso: solicitud.fechaDescanso,
+    motivo: solicitud.motivo,
+    registrado_por: solicitud.registradoPor || null,
+    creado_en: solicitud.creadoEn,
+    cumplida: false,
+  };
+
+  data.solicitudes.unshift(row);
+  await storage.writeData(data);
+  return mapSolicitudFromStore(row);
+}
+
+async function deleteSolicitud(id) {
+  const data = await storage.readData();
+  const antes = data.solicitudes.length;
+  data.solicitudes = data.solicitudes.filter((s) => s.id !== id);
+
+  if (data.solicitudes.length === antes) {
+    return false;
+  }
+
+  await storage.writeData(data);
+  return true;
+}
+
+async function markSolicitudAsCumplida(id, cumplida = true) {
+  const data = await storage.readData();
+  const solicitud = data.solicitudes.find((s) => s.id === id);
+
+  if (!solicitud) {
+    return null;
+  }
+
+  solicitud.cumplida = cumplida;
+  await storage.writeData(data);
+  return mapSolicitudFromStore(solicitud);
+}
+
+async function wasDailyNotificationSent(email, fechaEnvio) {
+  const data = await storage.readData();
+  return data.notificacionesDiarias.some(
+    (n) => n.email_destino === email && n.fecha_envio === fechaEnvio
+  );
+}
+
+async function markDailyNotificationSent(email, fechaEnvio) {
+  const data = await storage.readData();
+
+  const existe = data.notificacionesDiarias.some(
+    (n) => n.email_destino === email && n.fecha_envio === fechaEnvio
+  );
+
+  if (!existe) {
+    data.notificacionesDiarias.push({
+      email_destino: email,
+      fecha_envio: fechaEnvio,
+      enviado_en: new Date().toISOString(),
+    });
+    await storage.writeData(data);
+  }
+}
+
+async function importarDatos(payload) {
+  const actual = await storage.readData();
+  const solicitudes = Array.isArray(payload.solicitudes)
+    ? payload.solicitudes
+    : actual.solicitudes;
+  const notificacionesDiarias = Array.isArray(payload.notificacionesDiarias)
+    ? payload.notificacionesDiarias
+    : actual.notificacionesDiarias;
+
+  await storage.replaceData({ solicitudes, notificacionesDiarias });
+  return storage.normalizeData({ solicitudes, notificacionesDiarias });
+}
+
 module.exports = {
   getAllSolicitudes,
   getSolicitudById,
@@ -149,4 +120,5 @@ module.exports = {
   markSolicitudAsCumplida,
   wasDailyNotificationSent,
   markDailyNotificationSent,
+  importarDatos,
 };

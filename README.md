@@ -75,7 +75,7 @@ curl -X POST http://localhost:3000/api/notificaciones/ejecutar ^
 
 ## Datos
 
-Las solicitudes se guardan en `data/descansos.json` (compartido por todos los usuarios).
+Las solicitudes se guardan en el servidor: archivo `data/descansos.json` en desarrollo, o **Upstash Redis** en producción (Render). Ver **DEPLOY.md** Parte 5.
 
 ## Usuarios habilitados
 

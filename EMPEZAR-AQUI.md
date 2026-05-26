@@ -80,6 +80,10 @@ En Render, por cada fila de abajo: clic **Add Environment Variable** → **Key**
 | `SMTP_PASS` | Tu `.env` (16 letras, sin espacios) |
 | `MAIL_FROM` | Tu `.env` pero **sin** las comillas `"` alrededor |
 | `ADMIN_KEY` | Tu `.env` |
+| `UPSTASH_REDIS_REST_URL` | Crear base gratis en [upstash.com](https://upstash.com) → REST API |
+| `UPSTASH_REDIS_REST_TOKEN` | Mismo panel de Upstash |
+
+Sin Upstash, **los datos se pierden** al reiniciar Render. Ver **DEPLOY.md** Parte 5.
 
 **No agregues** `PORT` (Render lo pone solo).
 
@@ -138,9 +142,10 @@ Render gratis a veces “duerme” el servidor. Para el correo diario usá **cro
 - Si `"smtp": false`, revisá `SMTP_PASS` en Render (contraseña de aplicación de Gmail).
 - Guía Gmail: archivo `GMAIL-CONFIG.md` en el proyecto.
 
-### Perdí los datos / no veo las solicitudes viejas
-- Los datos en la nube son los del servidor, no los de tu PC automáticamente.
-- Podés volver a cargar solicitudes en la web, o pedir ayuda para migrar `data/descansos.json`.
+### Perdí los datos / no se guardan los de hoy
+- En Render **hay que configurar Upstash** (Paso 4: `UPSTASH_REDIS_*`). Sin eso, los datos se borran al reiniciar.
+- Para recuperar lo de tu PC: `npm run importar-datos` (con las mismas variables en `.env`). Ver **DEPLOY.md** Parte 5.
+- En `/api/health` debe decir `"storage": { "backend": "upstash", "persistent": true }`.
 
 ---
 
